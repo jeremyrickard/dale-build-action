@@ -7,6 +7,4 @@ RUN go build -o bin/dalec-tools .
 FROM ubuntu:latest
 COPY --from=BUILDER /dalec-tools/bin/dalec-tools .
 COPY entrypoint.sh /
-RUN ls -l
-COPY manager.yml /github/workspace/specs/kubernetes-eraser/
 ENTRYPOINT [ "/entrypoint.sh" ]
