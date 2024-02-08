@@ -1,0 +1,31 @@
+name: 'Build'
+description: 'Build a DALEC Build Def'
+inputs:
+  targets:  # id of input
+    description: 'targets to run'
+    required: true
+    default: 'mariner2/container'
+  definition:
+    description: 'definition file to build'
+    retquired: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get Build Info
+      id: get-build-info
+      uses: jeremyrickard/dalec-build-actions/build-info@9d24e1c71da52f62b442a7646e0a477d0d7e0dad
+      with:
+        definition: ${{ inputs.definition }}
+    - name: Perform Build
+      id: do-dalec-build
+      run: |
+        echo ${{ steps.get-build-info.outputs.build-ifno }}
+        file=${{ inputs.definition }}
+        base_file=$(basename $file)
+        base_file="${base_file%.yml}"
+        docker buildx build \
+          --push \
+          -f $file --target "${{ inputs.targets }}" \
+          -t upstream.azurecr.io/oss/eraser/$base_file:${{ github.sha }}-linux-amd64 .
+      shell: bash
+
