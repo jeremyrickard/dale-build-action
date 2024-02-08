@@ -1,0 +1,17 @@
+# action.yml
+name: 'DALEC Build Info'
+description: 'Get Build Info for DALEC definition'
+inputs:
+  definition:  # id of input
+    description: 'Path to file'
+    required: true
+outputs:
+  build-ifno: # id of output
+    description: 'The version and commit from the definition'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - "build-info"
+    - "--definition"
+    - "/github/workspace/${{ inputs.definition }"
