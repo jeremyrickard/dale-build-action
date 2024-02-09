@@ -12,14 +12,18 @@ runs:
   using: "composite"
   steps:
     - name: Install dalec tools
+      id: install-dalec-tools
       run: |
         git clone https://github.com/jeremyrickard/dalec-tools.git
         cd dalec-tools
         go install .
+      shell: bash
     - name: Login to AZ and ACR
+      id: azure-login
       run: |
         az login --identity
         az acr login -n upstream
+      shell: bash
     - name: Perform Build
       id: do-dalec-build
       run: |
