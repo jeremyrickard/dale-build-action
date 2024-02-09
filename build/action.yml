@@ -16,7 +16,7 @@ runs:
       run: |
         git clone https://github.com/jeremyrickard/dalec-tools.git
         cd dalec-tools
-        go install .
+        sudo GOBIN=/usr/local/bin/ go install .
       shell: bash
     - name: Login to AZ and ACR
       id: azure-login
