@@ -5,27 +5,34 @@ inputs:
     description: 'targets to run'
     required: true
     default: 'mariner2/container'
-  definition:
+  definitions:
     description: 'definition file to build'
-    retquired: true
+    required: true
 runs:
   using: "composite"
   steps:
-    - name: Get Build Info
-      id: get-build-info
-      uses: jeremyrickard/dalec-build-actions/build-info@9d24e1c71da52f62b442a7646e0a477d0d7e0dad
-      with:
-        definition: ${{ inputs.definition }}
+    - name: Install dalec tools
+      run: |
+        git clone https://github.com/jeremyrickard/dalec-tools.git
+        cd dalec-tools
+        go install .
+    - name: Login to AZ and ACR
+      run: |
+        az login --identity
+        az acr login -n upstream
     - name: Perform Build
       id: do-dalec-build
       run: |
-        echo ${{ steps.get-build-info.outputs.build-ifno }}
-        file=${{ inputs.definition }}
-        base_file=$(basename $file)
-        base_file="${base_file%.yml}"
-        docker buildx build \
-          --push \
-          -f $file --target "${{ inputs.targets }}" \
-          -t upstream.azurecr.io/oss/eraser/$base_file:${{ github.sha }}-linux-amd64 .
+        DALEC_ALL_CHANGED_FILES="${{inputs.definitions}}"
+        for file in $DALEC_ALL_CHANGED_FILES; do
+            base_file=$(basename $file)
+            base_file="${base_file%.yml}"
+            build_info=$(dalec-tools build-info --definition $file)
+            tag=$(tag=$(echo $build_info | jq .version)
+            docker buildx build \
+              --push \
+              -f $file --target mariner2/container \
+              -t upstream.azurecr.io/oss/eraser/$base_file:$tag-linux-amd64 .
+        done
       shell: bash
 
