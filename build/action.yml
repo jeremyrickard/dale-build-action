@@ -33,7 +33,7 @@ runs:
             base_file="${base_file%.yml}"
             dalec-tools build-info --definition $file
             build_info=$(dalec-tools build-info --definition $file)
-            tag=$(echo $build_info | jq .version)
+            tag=$(echo $build_info | jq -r .version)
             docker buildx build \
               --push \
               -f $file --target mariner2/container \
